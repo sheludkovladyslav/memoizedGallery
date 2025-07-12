@@ -25,7 +25,7 @@ export default class Modal extends React.Component {
     );
   };
 
-  fetchData = async (event) => {
+  fetchData = async () => {
     if (!this.state.id) return;
 
     this.setState({ isLoading: true });
@@ -49,8 +49,6 @@ export default class Modal extends React.Component {
     }
   };
   renderModal = () => {
-    const picture = this.state.picture;
-
     if (this.state.error) {
       const instance = basicLightbox.create(`
     <div class="modal">

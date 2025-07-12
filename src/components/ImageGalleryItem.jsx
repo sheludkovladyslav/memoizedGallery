@@ -1,20 +1,31 @@
 import React from "react";
+import * as basicLightbox from "basiclightbox";
+import "basiclightbox/dist/basicLightbox.min.css";
 
 export default class ImageGalleryItem extends React.Component {
+  openModal = (url) => {
+    console.log("click");
+    const instance = basicLightbox.create(`
+      <div class="modal">
+        <img src="${url}" alt="Large view" />
+      </div>
+    `);
+    instance.show();
+  };
+
   render() {
     const galleryItems = this.props.pictures;
-    const modalShow = this.props.modalShow;
 
     return (
       <>
         {galleryItems.map((picture) => {
           return (
-            <li key={picture.id} onClick={modalShow} data-id={picture.id}>
+            <li key={picture.id} data-id={picture.id} className="picture">
               <img
-                src={picture.webformatURL}
+                src={picture.previewURL}
+                className="img"
                 alt=""
-                width={picture.webformatWidth}
-                height={picture.webformatHeight}
+                onClick={() => this.openModal(picture.largeImageURL)}
               />
             </li>
           );

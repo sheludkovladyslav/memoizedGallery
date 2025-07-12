@@ -3,7 +3,7 @@ import React from "react";
 export default class Searchbar extends React.Component {
   inputValue = (event) => {
     event.preventDefault();
-    const input = event.target.elements.input;
+    const input = event.target.elements.input.value;
 
     this.props.SearchValue(input);
 
@@ -12,11 +12,7 @@ export default class Searchbar extends React.Component {
 
   render() {
     return (
-      <form class="form" onSubmit={this.inputValue}>
-        <button type="submit" class="button">
-          <span class="button-label">Search</span>
-        </button>
-
+      <form className="searchbar" onSubmit={this.inputValue}>
         <input
           className="input"
           type="text"
@@ -25,6 +21,10 @@ export default class Searchbar extends React.Component {
           autoFocus
           placeholder="Search images and photos"
         />
+
+        <button type="submit" className="button">
+          <span className="button-label">Search</span>
+        </button>
       </form>
     );
   }
