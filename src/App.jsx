@@ -1,104 +1,82 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import axios from "axios";
 import Searchbar from "./components/Searchbar";
 import ImageGallery from "./components/ImageGallery";
 import Button from "./components/Button";
 import "./App.css";
+import { useState, useMemo } from "react";
 
 axios.defaults.baseURL = "https://pixabay.com/api/";
 let key = "47940094-0c8011e76b1fc57fc5c880eaa";
 
-export default class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      pictures: [],
-      page: 1,
-      isLoading: false,
-      error: "",
-      query: "",
-    };
-  }
+export default function App() {
+  const [pictures, setPictures] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
 
-  searchPictures = async () => {
-    this.setState({
-      isLoading: true,
-    });
+  const prevPage = useRef(page);
+  const prevQuery = useRef(query);
+
+  const searchPictures = async () => {
+    setIsLoading(true);
     try {
-      const query = this.state.query;
-      const page = this.state.page;
+      setPictures([]);
 
       const response = await axios.get(
         `?q=${query}&key=${key}&image_type=photo&orientation=horizontal&perPage=12&page=${page}`
       );
 
       const hits = response.data.hits;
-      console.log(hits);
 
-      this.setState({
-        pictures: hits,
-        isLoading: false,
-      });
+      setPictures(hits);
+      setIsLoading(false);
+      setQuery("");
     } catch (error) {
-      this.setState({
-        error: error,
-      });
+      setError(error);
     }
   };
 
-  async componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.page !== this.state.page &&
-      prevState.query === this.state.query
-    ) {
-      await this.loadMorePictures();
-    }
-  }
-
-  loadMorePictures = async () => {
+  const loadMorePictures = async () => {
     try {
-      const query = this.state.query;
-      const page = this.state.page;
-
       const response = await axios.get(
         `?q=${query}&key=${key}&image_type=photo&orientation=horizontal&perPage=12&page=${page}`
       );
 
       const hits = response.data.hits;
-      this.setState({
-        pictures: [...this.state.pictures, ...hits],
-      });
+      const picturesNow = pictures;
+      setPictures([...picturesNow, ...hits]);
     } catch (error) {
       console.error(error);
     }
   };
 
-  paginationLoader = () => {
-    this.setState({
-      page: this.state.page + 1,
-    });
+  useEffect(() => {
+    if (prevPage !== page && prevQuery !== query) {
+      loadMorePictures();
+    }
+  }, [page, query]);
+
+  const paginationLoader = () => {
+    const pageNow = page;
+    setPage(pageNow + 1);
   };
 
-  searchValue = async (input) => {
-    await this.setState({
-      query: input,
-    });
-
-    this.searchPictures();
+  const searchValue = async (input) => {
+    setQuery(input);
+    searchPictures();
   };
 
-  render() {
-    const { isLoading, error, pictures } = this.state;
-    return (
-      <>
-        <Searchbar SearchValue={this.searchValue}></Searchbar>
-        {isLoading && <p className="Loader">Loading...</p>}
-        {error && <p className="error">error!, {error}</p>}
-        <ImageGallery pictures={pictures}></ImageGallery>
-        <div className="btnContainer">
-          <Button paginationLoader={this.paginationLoader}></Button>
-        </div>
-      </>
-    );
-  }
+  return (
+    <>
+      <Searchbar SearchValue={searchValue}></Searchbar>
+      {isLoading && <p className="Loader">Loading...</p>}
+      {error && <p className="error">error!, {error}</p>}
+      <ImageGallery pictures={pictures}></ImageGallery>
+      <div className="btnContainer">
+        <Button paginationLoader={paginationLoader}></Button>
+      </div>
+    </>
+  );
 }
