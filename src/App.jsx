@@ -19,7 +19,7 @@ export default function App() {
   const prevPage = useRef(page);
   const prevQuery = useRef(query);
 
-  const searchPictures = async () => {
+  const searchPictures = useMemo(async () => {
     setIsLoading(true);
     try {
       setPictures([]);
@@ -32,11 +32,10 @@ export default function App() {
 
       setPictures(hits);
       setIsLoading(false);
-      setQuery("");
     } catch (error) {
       setError(error);
     }
-  };
+  }, [query]);
 
   const loadMorePictures = async () => {
     try {
@@ -68,12 +67,16 @@ export default function App() {
     searchPictures();
   };
 
+  const picturesMemo = useMemo(() => {
+    return pictures;
+  }, [pictures]);
+
   return (
     <>
       <Searchbar SearchValue={searchValue}></Searchbar>
       {isLoading && <p className="Loader">Loading...</p>}
       {error && <p className="error">error!, {error}</p>}
-      <ImageGallery pictures={pictures}></ImageGallery>
+      <ImageGallery pictures={picturesMemo}></ImageGallery>
       <div className="btnContainer">
         <Button paginationLoader={paginationLoader}></Button>
       </div>
